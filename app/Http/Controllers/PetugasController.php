@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Peminjaman;
+use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
 use Throwable;
 
-class PeminjamanController extends Controller
+class PetugasController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,9 +22,9 @@ class PeminjamanController extends Controller
     {
         //
         if ($request->input() == null) {
-            $data = Peminjaman::with(['siswa', 'buku'])->get();
+            $data = User::all();
         } else {
-            $data = Peminjaman::where('penerbit', '=', $request->input('penerbit'))->orWhere('judul_buku', $request->input('judul_buku'))->get();
+            $data = User::where('nama_petugas', '=', $request->input('nama_petugas'))->orWhere('email', $request->input('email'))->get();
         }
         if (!$data->first()) {
             return response()->json(["msg" => "data not found"]);
@@ -52,22 +54,17 @@ class PeminjamanController extends Controller
         //
         try {
             $validatedData = $request->validate([
-                'tgl_pinjam' => 'required',
-                'tgl_pengembalian' => 'required',
-                'status_peminjaman' => 'required',
-                'id_siswa' => 'required',
-                'id_buku' => 'required',
+                "email" => 'required|email',
+                "password" => 'required',
+                "nama_petugas" => 'required',
             ]);
             if ($validatedData) {
-                $data = Peminjaman::create($request->all());
+                $validatedData['password'] = Hash::make($request->password);
+                $data = User::create($validatedData);
+                return response()->json(["msg" => "user successfully created", "data" => $data], 201);
             }
-
-            // INSERT INTO `peminjaman` (`id`, `tgl_pinjam`, `tgl_pengembalian`, `status`, `id_siswa`, `id_buku`, `created_at`, `updated_at`) VALUES (NULL, '2024-05-18', '2024-05-18', 'approved', '1', '1', NULL, NULL);
-            return response()->json(["message" => "Succesfully Created Data", "data" => $data], 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'msg' => $e->errors()
-            ]);
+        } catch (Exception $e) {
+            return response()->json(['msg' => $e->getMessage()]);
         }
     }
 
@@ -80,6 +77,14 @@ class PeminjamanController extends Controller
     public function show($id)
     {
         //
+        try {
+            $data = User::findOrFail($id);
+            return response()->json($data);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'msg' => 'user not found'
+            ]);
+        }
     }
 
     /**
@@ -103,6 +108,20 @@ class PeminjamanController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $validatedData = $request->validate([
+            "email" => 'required|email',
+            "nama_petugas" => 'required',
+        ]);
+
+        if ($validatedData) {
+            $data = User::where('id_buku', '=', $id)->update($validatedData);
+        }
+
+        if ($data) {
+            return response()->json(['msg' => "Data Updated"]);
+        } else {
+            return Response::HTTP_REQUEST_TIMEOUT;
+        }
     }
 
     /**
@@ -114,5 +133,17 @@ class PeminjamanController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            $user = User::where('id', '=', $id);
+            if (!$user->first()) {
+                return response()->json(['msg' => 'User Not Found']);
+            } else {
+                $user->delete();
+                return response()->json(['msg' => 'Successfully Deleted Data']);
+            }
+            return response()->json($user == null);
+        } catch (Throwable $e) {
+            return response()->json($e->errorInfo);
+        }
     }
 }

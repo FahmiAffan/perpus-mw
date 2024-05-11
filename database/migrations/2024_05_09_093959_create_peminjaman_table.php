@@ -14,10 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('peminjaman', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_peminjaman');
             $table->date('tgl_pinjam');
             $table->date('tgl_pengembalian');
-            $table->enum('status', ['approved', 'rejected']);
+            $table->enum('approval', ['approved', 'rejected'])->nullable();
+            $table->enum('status_peminjaman', ['booked', 'returned']);
             $table->unsignedBigInteger('id_siswa');
             $table->unsignedBigInteger('id_buku');
             $table->timestamps();

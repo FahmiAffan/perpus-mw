@@ -9,7 +9,8 @@ class Buku extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'id_siswa';
+    protected $table = 'buku';
+    protected $primaryKey = 'id_buku';
     protected $fillable = ['judul_buku', 'penerbit'];
 
     public function peminjaman()
