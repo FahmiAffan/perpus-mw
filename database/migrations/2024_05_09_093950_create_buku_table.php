@@ -17,6 +17,10 @@ return new class extends Migration
             $table->id('id_buku');
             $table->string('judul_buku');
             $table->string('penerbit');
+            $table->text('deskripsi');
+            $table->enum('tipe', ['ebook', 'book']);
+            $table->text('slug');
+            $table->text('image');
             $table->timestamps();
         });
     }

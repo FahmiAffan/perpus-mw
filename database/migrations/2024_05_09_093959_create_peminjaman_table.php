@@ -19,12 +19,12 @@ return new class extends Migration
             $table->date('tgl_pengembalian');
             $table->enum('approval', ['approved', 'rejected'])->nullable();
             $table->enum('status_peminjaman', ['booked', 'returned']);
-            $table->unsignedBigInteger('id_siswa');
+            $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_buku');
             $table->timestamps();
         });
         Schema::table('peminjaman', function (Blueprint $table) {
-            $table->foreign('id_siswa')->references('id_siswa')->on('siswa')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('id_user')->references('id_user')->on('user')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('id_buku')->references('id_buku')->on('buku')->onDelete('cascade')->onUpdate('cascade');
         });
     }
