@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('tgl_pinjam');
             $table->date('tgl_pengembalian');
             $table->enum('approval', ['approved', 'rejected'])->nullable();
-            $table->enum('status_peminjaman', ['booked', 'returned']);
+            $table->enum('status_peminjaman', ['booked', 'returned'])->nullable();
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_buku');
             $table->timestamps();

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class BukuController extends Controller
@@ -54,10 +55,15 @@ class BukuController extends Controller
             $validatedData = $request->validate([
                 'judul_buku' => 'required',
                 'penerbit' => 'required',
+                'deskripsi' => 'required',
+                'tipe' => 'required',
+                'image' => 'required',
             ]);
+            $path = Storage::disk('public')->put('book', $validatedData['image']);
+            $validatedData['image'] = $path;
             $data = Buku::create($validatedData);
             // dd($validatedData);
-            return response()->json(["message" => "Succesfully Created Data", "data" => $data], 201);
+            return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
@@ -108,13 +114,26 @@ class BukuController extends Controller
         $validatedData = $request->validate([
             'judul_buku' => 'required',
             'penerbit' => 'required',
+            'deskripsi' => 'required',
+            'tipe' => 'required',
+            'image' => 'required',
         ]);
 
+        // $previousImage = Buku::findOrFail($id)->image;
+
+        // if($validatedData){
+        //     Storage::delete($previousImage);
+        // }
+
+        $path = Storage::disk('public')->put('book', $validatedData['image']);
+        $validatedData['image'] = $path;
+        $data = Buku::create($validatedData);
         $data = Buku::where('id_buku', '=', $id)->update($validatedData);
+        
         if ($data) {
             return response()->json(['msg' => "Data Updated"]);
         } else {
-            return Response::HTTP_REQUEST_TIMEOUT;
+            return response()->json(['msg' => "Data Gagal Di perbaharui"], 400);
         }
     }
 

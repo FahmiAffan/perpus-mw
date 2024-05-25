@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class PetugasController extends Controller
@@ -24,7 +25,7 @@ class PetugasController extends Controller
         if ($request->input() == null) {
             $data = User::all();
         } else {
-            $data = User::where('nama_petugas', '=', $request->input('nama_petugas'))->orWhere('email', $request->input('email'))->get();
+            $data = User::where('username', '=', $request->input('username'))->orWhere('email', $request->input('email'))->get();
         }
         if (!$data->first()) {
             return response()->json(["msg" => "data not found"]);
@@ -54,12 +55,17 @@ class PetugasController extends Controller
         //
         try {
             $validatedData = $request->validate([
-                "email" => 'required|email',
+                "nik" => 'required|integer',
                 "password" => 'required',
-                "nama_petugas" => 'required',
+                "username" => 'required',
+                "role" => 'required',
+                "telp" => 'required',
+                "image" => 'file',
             ]);
             if ($validatedData) {
                 $validatedData['password'] = Hash::make($request->password);
+                $path = Storage::disk('public')->put('avatar', $validatedData['image']);
+                $validatedData['image'] = $path;
                 $data = User::create($validatedData);
                 return response()->json(["msg" => "user successfully created", "data" => $data], 201);
             }
@@ -108,13 +114,25 @@ class PetugasController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $validatedData = $request->validate([
-            "email" => 'required|email',
-            "nama_petugas" => 'required',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                "nik" => 'required|integer',
+                "password" => 'required',
+                "username" => 'required',
+                "role" => 'required',
+                "telp" => 'required',
+                "image" => 'file',
+            ]);
 
-        if ($validatedData) {
-            $data = User::where('id_buku', '=', $id)->update($validatedData);
+            if ($validatedData) {
+                $oldImage = User::find($id)->image;
+                Storage::delete($oldImage);
+                $data = User::where('id_buku', '=', $id)->update($validatedData);
+            }
+
+            return response()->json(["msg" => "Data Berhasil Di Perbarui", "data" => $data]);
+        } catch (Exception $e) {
+            return response()->json(["msg" => $e->getMessage(), "req" => $request]);
         }
 
         if ($data) {

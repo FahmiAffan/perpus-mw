@@ -55,7 +55,7 @@ class PeminjamanController extends Controller
                 'tgl_pinjam' => 'required',
                 'tgl_pengembalian' => 'required',
                 'status_peminjaman' => 'required',
-                'id_siswa' => 'required',
+                'id_user' => 'required',
                 'id_buku' => 'required',
             ]);
             if ($validatedData) {
@@ -63,7 +63,7 @@ class PeminjamanController extends Controller
             }
 
             // INSERT INTO `peminjaman` (`id`, `tgl_pinjam`, `tgl_pengembalian`, `status`, `id_siswa`, `id_buku`, `created_at`, `updated_at`) VALUES (NULL, '2024-05-18', '2024-05-18', 'approved', '1', '1', NULL, NULL);
-            return response()->json(["message" => "Succesfully Created Data", "data" => $data], 201);
+            return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
@@ -80,6 +80,14 @@ class PeminjamanController extends Controller
     public function show($id)
     {
         //
+        try {
+            $data = Peminjaman::findOrFail($id);
+            return response()->json($data);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'msg' => 'Data not found'
+            ]);
+        }
     }
 
     /**
@@ -103,6 +111,20 @@ class PeminjamanController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $validatedData = $request->validate([
+            'tgl_pinjam' => 'required',
+            'tgl_pengembalian' => 'required',
+            'status_peminjaman' => 'required',
+            'id_user' => 'required',
+            'id_buku' => 'required',
+        ]);
+
+        $data = Peminjaman::where('id_peminjaman', '=', $id)->update($validatedData);
+        if ($data) {
+            return response()->json(['msg' => "Data Updated"]);
+        } else {
+            return Response::HTTP_REQUEST_TIMEOUT;
+        }
     }
 
     /**
@@ -114,5 +136,17 @@ class PeminjamanController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            $data = Peminjaman::where('id_peminjaman', '=', $id);
+            if (!$data->first()) {
+                return response()->json(['msg' => 'Data Not Found']);
+            } else {
+                $data->delete();
+                return response()->json(['msg' => 'Successfully Deleted Data']);
+            }
+            // return response()->json($data == null);
+        } catch (Throwable $e) {
+            return response()->json($e->errorInfo);
+        }
     }
 }

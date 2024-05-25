@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('nik')->unique();
             $table->string('username');
             $table->string('password');
-            $table->string('gambar');
-            $table->enum('role', ['siswa', 'guru']);
+            $table->string('image')->nullable();
+            $table->enum('role', ['siswa', 'petugas']);
             $table->string('telp');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

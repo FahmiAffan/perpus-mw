@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,11 +14,14 @@ class AuthController extends Controller
     //
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('nik', 'password');
 
         if (Auth::attempt($credentials)) {
-            $token = Auth::user()->createToken('My Token')->plainTextToken;
-            return response()->json(['user' => Auth::user(), 'token' => $token]);
+            $accessToken = Auth::user()->createToken('access_token', ['*'], Carbon::now()->addMinutes(config('sanctum.ac_expiration')))->plainTextToken;
+            $refreshToken = Auth::user()->createToken('refresh_token', ['*'], Carbon::now()->addMinutes(config('sanctum.rt_expiration')))->plainTextToken;
+            return response()->json(['user' => Auth::user(), 'accessToken' => $accessToken, 'refreshToken' => $refreshToken]);
+        } else {
+            return response()->json(["msg" => "wrong email or password"], 400);
         }
     }
 
@@ -25,9 +29,9 @@ class AuthController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                "email" => 'required|email',
+                "nik" => 'required|email',
                 "password" => 'required',
-                "nama_petugas" => 'required',
+                "username" => 'required',
             ]);
             if ($validatedData) {
                 $validatedData['password'] = Hash::make($request->password);
@@ -44,7 +48,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             $request->user()->tokens()->delete();
             return response()->json(["msg" => "Berhasil Logout"], 200);
-        }else{
+        } else {
             return response()->json(["msg" => "unauthorized"]);
         }
     }

@@ -19,8 +19,9 @@ return new class extends Migration
             $table->string('penerbit');
             $table->text('deskripsi');
             $table->enum('tipe', ['ebook', 'book']);
-            $table->text('slug');
+            $table->text('slug')->nullable();
             $table->text('image');
+            // $table->mediumInteger('qty');
             $table->timestamps();
         });
     }

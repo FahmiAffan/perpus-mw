@@ -11,10 +11,10 @@ class Buku extends Model
 
     protected $table = 'buku';
     protected $primaryKey = 'id_buku';
-    protected $fillable = ['judul_buku', 'penerbit'];
+    protected $fillable = ['judul_buku', 'penerbit', 'deskripsi', 'tipe', 'slug', 'image'];
 
     public function peminjaman()
     {
-        return $this->belongsTo(Peminjaman::class, 'id_siswa', 'id_siswa');
+        return $this->belongsTo(Peminjaman::class, 'id_buku', 'id_buku');
     }
 }

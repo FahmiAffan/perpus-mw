@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Siswa;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class SiswaController extends Controller
@@ -20,9 +22,9 @@ class SiswaController extends Controller
     {
         //
         if ($request->input() == null) {
-            $data = Siswa::all();
+            $data = User::all();
         } else {
-            $data = Siswa::where('nama_siswa', '=', $request->input('nama_siswa'))->orWhere('kelas', $request->input('kelas'))->orWhere('NIK', $request->input('NIK'))->get();
+            $data = User::where('nama_siswa', '=', $request->input('nama_siswa'))->orWhere('kelas', $request->input('kelas'))->orWhere('NIK', $request->input('NIK'))->get();
         }
         if (!$data->first()) {
             return response()->json(["msg" => "data not found"]);
@@ -52,11 +54,18 @@ class SiswaController extends Controller
         //
         try {
             $validatedData = $request->validate([
-                'nama_siswa' => 'required',
+                'username' => 'required',
                 'kelas' => 'required',
-                'NIK' => 'required',
+                'nik' => 'required',
+                'password' => 'required',
+                'image' => 'file',
+                'role' => 'required',
+                'telp' => 'required',
             ]);
-            $data = Siswa::create($validatedData);
+            $validatedData['password'] = Hash::make($request->password);
+            $path = Storage::disk('public')->put('avatar', $validatedData['image']);
+            $validatedData['image'] = $path;
+            $data = User::create($validatedData);
             return response()->json(["message" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -75,7 +84,7 @@ class SiswaController extends Controller
     {
         //
         try {
-            $data = Siswa::findOrFail($id);
+            $data = User::findOrFail($id);
             return response()->json($data);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -106,11 +115,14 @@ class SiswaController extends Controller
     {
         //
         $validatedData = $request->validate([
-            'nama_siswa' => 'required',
-            'kelas' => 'required',
-            'NIK' => 'required',
+            'username' => 'required',
+            'nik' => 'required',
+            'password' => 'required',
+            'image' => 'file',
+            'role' => 'required',
+            'telp' => 'required',
         ]);
-        $data = Siswa::where('id_siswa', '=', $id)->update($validatedData);
+        $data = User::where('id_siswa', '=', $id)->update($validatedData);
         // dd($validatedData);
         if ($data) {
             return response()->json(['msg' => "Data Updated"]);
@@ -129,7 +141,7 @@ class SiswaController extends Controller
     {
         //
         try {
-            $user = Siswa::where('id_course', '=', $id);
+            $user = User::where('id_course', '=', $id);
             if (!$user->first()) {
                 return response()->json(['msg' => 'Siswa Not Found']);
             } else {
