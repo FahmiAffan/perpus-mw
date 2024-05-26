@@ -165,4 +165,19 @@ class PeminjamanController extends Controller
             return response()->json($e->errorInfo);
         }
     }
+
+    public function updateStatus($id, Request $request)
+    {
+        $data = Peminjaman::where('id_peminjaman', '=', $id)->update([
+            'status_peminjaman' => $request->input('status_peminjaman')
+        ]);
+
+        if ($data) {
+            return response()->json(["msg" => "Berhasil Update Status"], 201);
+        }else{
+            return response()->json(["msg" => "terjadi kesalahan"], 400);
+
+        }
+        dd($request->all());
+    }
 }

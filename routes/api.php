@@ -30,6 +30,7 @@
         Route::resource('peminjaman', PeminjamanController::class);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::resource('buku', BukuController::class);
+        Route::put('/updateStatus/{id}' , [PeminjamanController::class , 'updateStatus']);
     });
     
     Route::resource('users', PetugasController::class);
