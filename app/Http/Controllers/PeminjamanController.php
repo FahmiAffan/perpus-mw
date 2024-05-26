@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Peminjaman;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -63,12 +64,18 @@ class PeminjamanController extends Controller
                 'nik' => 'required',
                 'id_buku' => 'required',
             ]);
+
             if ($validatedData) {
-                $data = Peminjaman::create($request->all());
+                $date1 = Carbon::createFromDate($request->input('tgl_pengembalian'))->format('Y-m-d');
+                $date2 = Carbon::createFromDate($request->input('tgl_pinjam'))->format('Y-m-d');
+
+                $validatedData['tgl_pengembalian'] = $date1;
+                $validatedData['tgl_pinjam'] = $date2;
+                $data = Peminjaman::create($validatedData);
             }
+            return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
 
             // INSERT INTO `peminjaman` (`id`, `tgl_pinjam`, `tgl_pengembalian`, `status`, `id_siswa`, `id_buku`, `created_at`, `updated_at`) VALUES (NULL, '2024-05-18', '2024-05-18', 'approved', '1', '1', NULL, NULL);
-            return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
@@ -151,7 +158,7 @@ class PeminjamanController extends Controller
                 return response()->json(['msg' => 'Data Not Found']);
             } else {
                 $data->delete();
-                return response()->json(['msg' => 'Successfully Deleted Data']);
+                return response()->json(['msg' => 'Successfully Deleted Data'], 201);
             }
             // return response()->json($data == null);
         } catch (Throwable $e) {

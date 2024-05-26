@@ -159,7 +159,7 @@ class PetugasController extends Controller
                 return response()->json(['msg' => 'User Not Found']);
             } else {
                 $user->delete();
-                return response()->json(['msg' => 'Successfully Deleted Data']);
+                return response()->json(['msg' => 'Successfully Deleted Data'], 201);
             }
             return response()->json($user == null);
         } catch (Throwable $e) {
