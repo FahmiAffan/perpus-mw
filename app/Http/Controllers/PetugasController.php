@@ -64,8 +64,10 @@ class PetugasController extends Controller
             ]);
             if ($validatedData) {
                 $validatedData['password'] = Hash::make($request->password);
-                $path = Storage::disk('public')->put('avatar', $validatedData['image']);
-                $validatedData['image'] = $path;
+                if ($request->input('image') != null) {
+                    $path = Storage::disk('public')->put('avatar', $validatedData['image']);
+                    $validatedData['image'] = $path;
+                };
                 $data = User::create($validatedData);
                 return response()->json(["msg" => "user successfully created", "data" => $data], 201);
             }

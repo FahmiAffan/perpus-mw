@@ -58,7 +58,9 @@ class PeminjamanController extends Controller
                 'tgl_pinjam' => 'required',
                 'tgl_pengembalian' => 'required',
                 'status_peminjaman' => 'required',
-                'id_user' => 'required',
+                // 'id_user' => 'required',
+                'nama_siswa' => 'required',
+                'nik' => 'required',
                 'id_buku' => 'required',
             ]);
             if ($validatedData) {
@@ -70,7 +72,7 @@ class PeminjamanController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
-            ]);
+            ], 400);
         }
     }
 
@@ -123,6 +125,8 @@ class PeminjamanController extends Controller
             'id_user' => 'required',
             'id_buku' => 'required',
         ]);
+
+        dd($validatedData);
 
         $data = Peminjaman::where('id_peminjaman', '=', $id)->update($validatedData);
         if ($data) {

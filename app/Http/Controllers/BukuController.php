@@ -59,15 +59,17 @@ class BukuController extends Controller
                 'tipe' => 'required',
                 'image' => 'file',
             ]);
-            $path = Storage::disk('public')->put('book', $validatedData['image']);
-            $validatedData['image'] = $path;
+            if ($request->input('image') != null) {
+                $path = Storage::disk('public')->put('book', $validatedData['image']);
+                $validatedData['image'] = $path;
+            }
             $data = Buku::create($validatedData);
             // dd($validatedData);
             return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
-            ]);
+            ], 400);
         }
     }
 

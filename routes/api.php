@@ -26,10 +26,10 @@
 
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::resource('buku', BukuController::class);
         Route::resource('siswa', SiswaController::class);
         Route::resource('peminjaman', PeminjamanController::class);
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::resource('buku', BukuController::class);
     });
     
     Route::resource('users', PetugasController::class);

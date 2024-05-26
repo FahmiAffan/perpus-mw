@@ -11,7 +11,8 @@ class Peminjaman extends Model
 
     protected $table = 'peminjaman';
     protected $primaryKey = 'id_peminjaman';
-    protected $fillable = ['tgl_pinjam', 'tgl_pengembalian', 'approval', 'status_peminjaman' , 'id_user', 'id_buku'];
+    // protected $fillable = ['tgl_pinjam', 'tgl_pengembalian', 'approval', 'status_peminjaman' , 'id_user', 'id_buku'];
+    protected $fillable = ['tgl_pinjam', 'tgl_pengembalian', 'approval', 'status_peminjaman' , 'nama_siswa', 'nik', 'id_buku'];
 
     public function siswa()
     {
