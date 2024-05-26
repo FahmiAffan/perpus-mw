@@ -20,7 +20,8 @@ class PeminjamanController extends Controller
     {
         //
         if ($request->input() == null) {
-            $data = Peminjaman::with(['siswa', 'buku'])->get();
+            // $data = Peminjaman::with(['siswa', 'buku'])->get();
+            $data = Peminjaman::with(['buku'])->get();
         } else {
             $data = Peminjaman::where('penerbit', '=', $request->input('penerbit'))->orWhere('judul_buku', $request->input('judul_buku'))->get();
         }
@@ -52,6 +53,8 @@ class PeminjamanController extends Controller
         //
         try {
             $validatedData = $request->validate([
+                'nik' => 'required',
+                'nama_siswa' => 'required',
                 'tgl_pinjam' => 'required',
                 'tgl_pengembalian' => 'required',
                 'status_peminjaman' => 'required',
@@ -112,6 +115,8 @@ class PeminjamanController extends Controller
     {
         //
         $validatedData = $request->validate([
+            'nik' => 'required',
+            'nama_siswa' => 'required',
             'tgl_pinjam' => 'required',
             'tgl_pengembalian' => 'required',
             'status_peminjaman' => 'required',

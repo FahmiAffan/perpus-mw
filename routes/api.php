@@ -30,8 +30,8 @@
         Route::resource('siswa', SiswaController::class);
         Route::resource('peminjaman', PeminjamanController::class);
         Route::post('/logout', [AuthController::class, 'logout']);
-        Route::resource('users', PetugasController::class);
     });
-
+    
+    Route::resource('users', PetugasController::class);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);

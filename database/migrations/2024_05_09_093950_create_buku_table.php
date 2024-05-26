@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('deskripsi');
             $table->enum('tipe', ['ebook', 'book']);
             $table->text('slug')->nullable();
-            $table->text('image');
+            $table->text('image')->nullable();
             // $table->mediumInteger('qty');
             $table->timestamps();
         });

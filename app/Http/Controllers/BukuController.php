@@ -57,7 +57,7 @@ class BukuController extends Controller
                 'penerbit' => 'required',
                 'deskripsi' => 'required',
                 'tipe' => 'required',
-                'image' => 'required',
+                'image' => 'file',
             ]);
             $path = Storage::disk('public')->put('book', $validatedData['image']);
             $validatedData['image'] = $path;
@@ -116,7 +116,7 @@ class BukuController extends Controller
             'penerbit' => 'required',
             'deskripsi' => 'required',
             'tipe' => 'required',
-            'image' => 'required',
+            'image' => 'file',
         ]);
 
         // $previousImage = Buku::findOrFail($id)->image;
@@ -129,7 +129,7 @@ class BukuController extends Controller
         $validatedData['image'] = $path;
         $data = Buku::create($validatedData);
         $data = Buku::where('id_buku', '=', $id)->update($validatedData);
-        
+
         if ($data) {
             return response()->json(['msg' => "Data Updated"]);
         } else {
