@@ -11,7 +11,7 @@ class Buku extends Model
 
     protected $table = 'buku';
     protected $primaryKey = 'id_buku';
-    protected $fillable = ['judul_buku', 'penerbit', 'deskripsi', 'tipe', 'slug', 'image'];
+    protected $fillable = ['judul_buku', 'penerbit', 'deskripsi', 'tipe', 'slug', 'image', 'qty'];
 
     public function peminjaman()
     {

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->enum('tipe', ['ebook', 'book']);
             $table->text('slug')->nullable();
             $table->text('image')->nullable();
-            // $table->mediumInteger('qty');
+            $table->mediumInteger('qty');
             $table->timestamps();
         });
     }

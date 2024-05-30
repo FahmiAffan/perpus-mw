@@ -2,7 +2,9 @@
 
     use App\Http\Controllers\AuthController;
     use App\Http\Controllers\BukuController;
-    use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\DetailPeminjaman;
+use App\Http\Controllers\DetailPeminjamanController;
+use App\Http\Controllers\PeminjamanController;
     use App\Http\Controllers\PetugasController;
     use App\Http\Controllers\SiswaController;
     use Illuminate\Http\Request;
@@ -25,13 +27,14 @@
 
 
 
-    Route::middleware('auth:sanctum')->group(function () {
+    // Route::middleware('auth:sanctum')->group(function () {
         Route::resource('siswa', SiswaController::class);
         Route::resource('peminjaman', PeminjamanController::class);
+        Route::resource('detailPeminjaman', DetailPeminjamanController::class);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::resource('buku', BukuController::class);
         Route::put('/updateStatus/{id}' , [PeminjamanController::class , 'updateStatus']);
-    });
+    // });
     
     Route::resource('users', PetugasController::class);
     Route::post('/register', [AuthController::class, 'register']);

@@ -11,15 +11,14 @@ class Peminjaman extends Model
 
     protected $table = 'peminjaman';
     protected $primaryKey = 'id_peminjaman';
-    // protected $fillable = ['tgl_pinjam', 'tgl_pengembalian', 'approval', 'status_peminjaman' , 'id_user', 'id_buku'];
-    protected $fillable = ['tgl_pinjam', 'tgl_pengembalian', 'approval', 'status_peminjaman' , 'nama_siswa', 'nik', 'id_buku'];
+    protected $fillable = ['tgl_pinjam', 'tgl_pengembalian', 'approval', 'status_peminjaman' , 'id_user'];
 
     public function siswa()
     {
-        return $this->hasOne(Siswa::class, 'id_user', 'id_user');
+        return $this->hasOne(User::class, 'id_user', 'id_user');
     }
-    public function buku()
+    public function list_buku()
     {
-        return $this->hasOne(Buku::class, 'id_buku', 'id_buku');
+        return $this->belongsToMany(DetailPeminjaman::class, 'detail_peminjaman', 'id_peminjaman', 'id_peminjaman');
     }
 }

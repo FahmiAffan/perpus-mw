@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,18 +20,29 @@ class PeminjamanController extends Controller
      */
     public function index(Request $request)
     {
-        //
+
+        // $data = Peminjaman::find(2);
+        // $date = Carbon::parse($data->tgl_pinjam);
+        // $data->tgl_pinjam = $date->diffForHumans();
+
+
+        // dd($data);
+
         if ($request->input() == null) {
-            // $data = Peminjaman::with(['siswa', 'buku'])->get();
-            $data = Peminjaman::with(['buku'])->get();
+            $data = Peminjaman::with(['siswa', 'list_buku'])->get();
+            foreach ($data as $key => $datas) {
+                $data[$key]->tgl_pinjam = Carbon::parse($datas->tgl_pinjam)->diffForHumans();
+                $data[$key]->tgl_pengembalian = Carbon::parse($datas->tgl_pengembalian)->diffForHumans();
+            }
+            return response()->json(["msg" => "Successfuly Get Data", "data" => $data], 200);
         } else {
             $data = Peminjaman::where('penerbit', '=', $request->input('penerbit'))->orWhere('judul_buku', $request->input('judul_buku'))->get();
         }
-        if (!$data->first()) {
-            return response()->json(["msg" => "data not found"]);
-        } else {
-            return response()->json(["msg" => "Succesfuly Get Data", "data" => $data], 200);
-        }
+        // if (!$data->first()) {
+        //     return response()->json(["msg" => "data not found"]);
+        // } else {
+        //     return response()->json(["msg" => "Succesfuly Get Data", "data" => $data], 200);
+        // }
     }
 
     /**
@@ -52,17 +64,15 @@ class PeminjamanController extends Controller
     public function store(Request $request)
     {
         //
+
         try {
             $validatedData = $request->validate([
-                'nik' => 'required',
-                'nama_siswa' => 'required',
                 'tgl_pinjam' => 'required',
                 'tgl_pengembalian' => 'required',
                 'status_peminjaman' => 'required',
-                // 'id_user' => 'required',
-                'nama_siswa' => 'required',
-                'nik' => 'required',
-                'id_buku' => 'required',
+                'approval' => 'null',
+                'id_user' => 'required',
+                'list_buku' => 'required',
             ]);
 
             if ($validatedData) {
@@ -71,16 +81,48 @@ class PeminjamanController extends Controller
 
                 $validatedData['tgl_pengembalian'] = $date1;
                 $validatedData['tgl_pinjam'] = $date2;
+
                 $data = Peminjaman::create($validatedData);
+
+                foreach ($request->list_buku as $key => $field) {
+                    DetailPeminjaman::create([
+                        "id_peminjaman" => $data->id_peminjaman,
+                        "id_buku" => $field['id_buku'],
+                        "qty" => $field['qty']
+                    ]);
+                }
             }
             return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
-
-            // INSERT INTO `peminjaman` (`id`, `tgl_pinjam`, `tgl_pengembalian`, `status`, `id_siswa`, `id_buku`, `created_at`, `updated_at`) VALUES (NULL, '2024-05-18', '2024-05-18', 'approved', '1', '1', NULL, NULL);
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
             ], 400);
         }
+
+        // try {
+        //     $validatedData = $request->validate([
+        //         'tgl_pinjam' => 'required',
+        //         'tgl_pengembalian' => 'required',
+        //         'status_peminjaman' => 'required',
+        //         'approval' => 'null',
+        //         'id_user' => 'required',
+        //         'id_buku' => 'required',
+        //     ]);
+
+        //     if ($validatedData) {
+        //         $date1 = Carbon::createFromDate($request->input('tgl_pengembalian'))->format('Y-m-d');
+        //         $date2 = Carbon::createFromDate($request->input('tgl_pinjam'))->format('Y-m-d');
+
+        //         $validatedData['tgl_pengembalian'] = $date1;
+        //         $validatedData['tgl_pinjam'] = $date2;
+        //         $data = Peminjaman::create($validatedData);
+        //     }
+        //     return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
+        // } catch (ValidationException $e) {
+        //     return response()->json([
+        //         'msg' => $e->errors()
+        //     ], 400);
+        // }
     }
 
     /**
@@ -124,8 +166,6 @@ class PeminjamanController extends Controller
     {
         //
         $validatedData = $request->validate([
-            'nik' => 'required',
-            'nama_siswa' => 'required',
             'tgl_pinjam' => 'required',
             'tgl_pengembalian' => 'required',
             'status_peminjaman' => 'required',
@@ -174,9 +214,8 @@ class PeminjamanController extends Controller
 
         if ($data) {
             return response()->json(["msg" => "Berhasil Update Status"], 201);
-        }else{
+        } else {
             return response()->json(["msg" => "terjadi kesalahan"], 400);
-
         }
         dd($request->all());
     }
