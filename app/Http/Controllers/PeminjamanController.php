@@ -6,6 +6,7 @@ use App\Models\Buku;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
+use Error;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -76,6 +77,7 @@ class PeminjamanController extends Controller
                 'list_buku' => 'required',
             ]);
 
+
             if ($validatedData) {
                 $date1 = Carbon::createFromDate($request->input('tgl_pengembalian'))->format('Y-m-d');
                 $date2 = Carbon::createFromDate($request->input('tgl_pinjam'))->format('Y-m-d');
@@ -86,20 +88,22 @@ class PeminjamanController extends Controller
                 $data = Peminjaman::create($validatedData);
 
                 foreach ($request->list_buku as $key => $field) {
-                    // DetailPeminjaman::create([
-                    //     "id_peminjaman" => $data->id_peminjaman,
-                    //     "id_buku" => $field['id_buku'],
-                    //     "qty" => $field['qty']
-                    // ]);
+                    DetailPeminjaman::create([
+                        "id_peminjaman" => $data->id_peminjaman,
+                        "id_buku" => $field['id_buku'],
+                        "qty" => $field['qty']
+                    ]);
 
-                    $totalQty = [];
-                    $totalQty[$key] = $field->qty;
-                    $dataBuku = Buku::find($field['id_buku']);
+                    $dataBuku[$key] = Buku::find($field['id_buku']);
 
-                    $dataBuku->decrement('qty', array_sum($totalQty));
+                    if ($dataBuku[$key]->qty == null || $dataBuku[$key]->qty == 0 || $dataBuku[$key]->qty <= 0) {
+                        return response()->json(["msg" => "Stok Buku dengan nama " . $dataBuku[$key]->judul_buku . " Habis!!"], 400);
+                    } else {
+                        $dataBuku[$key]->decrement('qty', $field['qty']);
+                        return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
+                    }
                 }
             }
-            return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'msg' => $e->errors()
@@ -215,25 +219,34 @@ class PeminjamanController extends Controller
 
     public function updateStatus($id, Request $request)
     {
-        // $data = Peminjaman::where('id_peminjaman', '=', $id)->update([
-        //     'status_peminjaman' => $request->input('status_peminjaman')
-        // ]);
-        // if ($data) {
-        // }
-
-        // if ($data) {
-        //     return response()->json(["msg" => "Berhasil Update Status"], 201);
-        // } else {
-        //     return response()->json(["msg" => "terjadi kesalahan"], 400);
-        // }
         $data = Peminjaman::with('list_buku')->find($id);
 
-        $totalQty = [];
+        if ($data->status_peminjaman == 'returned') {
+            return response()->json(["msg" => "Peminjaman Telah Berakhir"], 400);
+        } else {
+            try {
+                $data->update([
+                    'status_peminjaman' => $request->input('status_peminjaman')
 
-        foreach ($data->list_buku as $key => $datas) {
-            $totalQty[$key] = $datas->qty;
+                ]);
+
+                foreach ($data->list_buku as $key => $datas) {
+                    // $totalQty = [];
+                    // $totalQty[$key] = $datas->qty;
+                    // $totalQty[$key] = $datas->qty;
+
+                    $dataBuku[$key] = Buku::find($datas['id_buku']);
+
+                    $dataBuku[$key]->increment('qty', $datas->qty);
+                }
+                return response()->json(["msg" => "Berhasil Update Status"], 201);
+            } catch (Error $e) {
+                return response()->json(["msg" => $e->getMessage()], 400);
+            }
         }
 
-        return response()->json(array_sum($totalQty));
+
+        // return response()->json(array_sum($totalQty));
+        return response()->json(["msg" => "Data Berhasil Di Update", "data" => $data, "list_buku" => $data->list_buku], 201);
     }
 }

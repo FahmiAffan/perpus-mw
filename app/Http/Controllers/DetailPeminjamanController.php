@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailPeminjaman;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class DetailPeminjamanController extends Controller
 {
@@ -49,11 +51,8 @@ class DetailPeminjamanController extends Controller
         //
         try {
             $validatedData = $request->validate([
-                'judul_buku' => 'required',
-                'penerbit' => 'required',
-                'deskripsi' => 'required',
-                'tipe' => 'required',
-                'image' => 'file',
+                'id_peminjaman' => 'required',
+                'id_buku' => 'required',
                 'qty' => 'required|integer',
             ]);
             $data = DetailPeminjaman::create($validatedData);
@@ -98,6 +97,20 @@ class DetailPeminjamanController extends Controller
     public function update(Request $request, $id)
     {
         //
+        try {
+            $validatedData = $request->validate([
+                'id_peminjaman' => 'required',
+                'id_buku' => 'required',
+                'qty' => 'required|integer',
+            ]);
+            $data = DetailPeminjaman::find($id)->update($validatedData);
+            // dd($validatedData);
+            return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'msg' => $e->errors()
+            ], 400);
+        }
     }
 
     /**
@@ -109,5 +122,10 @@ class DetailPeminjamanController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            DetailPeminjaman::find($id)->delete();
+        } catch (Throwable $e) {
+            return response()->json(["msg" => $e->errorInfo], 400);
+        }
     }
 }
