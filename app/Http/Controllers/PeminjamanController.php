@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Buku;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
@@ -85,11 +86,17 @@ class PeminjamanController extends Controller
                 $data = Peminjaman::create($validatedData);
 
                 foreach ($request->list_buku as $key => $field) {
-                    DetailPeminjaman::create([
-                        "id_peminjaman" => $data->id_peminjaman,
-                        "id_buku" => $field['id_buku'],
-                        "qty" => $field['qty']
-                    ]);
+                    // DetailPeminjaman::create([
+                    //     "id_peminjaman" => $data->id_peminjaman,
+                    //     "id_buku" => $field['id_buku'],
+                    //     "qty" => $field['qty']
+                    // ]);
+
+                    $totalQty = [];
+                    $totalQty[$key] = $field->qty;
+                    $dataBuku = Buku::find($field['id_buku']);
+
+                    $dataBuku->decrement('qty', array_sum($totalQty));
                 }
             }
             return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
@@ -208,15 +215,25 @@ class PeminjamanController extends Controller
 
     public function updateStatus($id, Request $request)
     {
-        $data = Peminjaman::where('id_peminjaman', '=', $id)->update([
-            'status_peminjaman' => $request->input('status_peminjaman')
-        ]);
+        // $data = Peminjaman::where('id_peminjaman', '=', $id)->update([
+        //     'status_peminjaman' => $request->input('status_peminjaman')
+        // ]);
+        // if ($data) {
+        // }
 
-        if ($data) {
-            return response()->json(["msg" => "Berhasil Update Status"], 201);
-        } else {
-            return response()->json(["msg" => "terjadi kesalahan"], 400);
+        // if ($data) {
+        //     return response()->json(["msg" => "Berhasil Update Status"], 201);
+        // } else {
+        //     return response()->json(["msg" => "terjadi kesalahan"], 400);
+        // }
+        $data = Peminjaman::with('list_buku')->find($id);
+
+        $totalQty = [];
+
+        foreach ($data->list_buku as $key => $datas) {
+            $totalQty[$key] = $datas->qty;
         }
-        dd($request->all());
+
+        return response()->json(array_sum($totalQty));
     }
 }

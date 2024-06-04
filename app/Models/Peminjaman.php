@@ -19,6 +19,6 @@ class Peminjaman extends Model
     }
     public function list_buku()
     {
-        return $this->belongsToMany(DetailPeminjaman::class, 'detail_peminjaman', 'id_peminjaman', 'id_peminjaman');
+        return $this->hasMany(DetailPeminjaman::class ,'id_peminjaman', 'id_peminjaman');
     }
 }
