@@ -19,7 +19,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $accessToken = Auth::user()->createToken('access_token', ['*'], Carbon::now()->addMinutes(config('sanctum.ac_expiration')))->plainTextToken;
             $refreshToken = Auth::user()->createToken('refresh_token', ['*'], Carbon::now()->addMinutes(config('sanctum.rt_expiration')))->plainTextToken;
-            return response()->json(['user' => Auth::user(), 'accessToken' => $accessToken, 'refreshToken' => $refreshToken]);
+            return response()->json(['user' => Auth::user(), 'accessToken' => $accessToken, 'refreshToken' => $refreshToken], 201);
         } else {
             return response()->json(["msg" => "wrong email or password"], 400);
         }
@@ -47,9 +47,9 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             $request->user()->tokens()->delete();
-            return response()->json(["msg" => "Berhasil Logout"], 200);
+            return response()->json(["msg" => "Berhasil Logout"], 201);
         } else {
-            return response()->json(["msg" => "unauthorized"]);
+            return response()->json(["msg" => "unauthorized"], 401);
         }
     }
 }

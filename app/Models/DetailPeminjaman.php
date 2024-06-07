@@ -13,7 +13,7 @@ class DetailPeminjaman extends Model
     protected $primaryKey = 'id_detail_peminjaman';
     protected $fillable = ['id_buku', 'id_peminjaman', 'qty'];
 
-    protected $hidden = ['id_buku', 'id_peminjaman'];
+    // protected $hidden = ['id_buku', 'id_peminjaman'];
 
     public function list_buku()
     {
