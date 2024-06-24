@@ -57,15 +57,29 @@ class BukuController extends Controller
                 'penerbit' => 'required',
                 'deskripsi' => 'required',
                 'tipe' => 'required',
-                'image' => 'file',
+                'image' => 'string',
                 'qty' => 'required|integer',
             ]);
-            if ($request->input('image') != null) {
-                $path = Storage::disk('public')->put('book', $validatedData['image']);
-                $validatedData['image'] = $path;
+            if ($validatedData['image'] != null) {
+                $imageData = $validatedData['image'];
+
+                preg_match('/^data:image\/(\w+);base64,/', $imageData, $type);
+                $extension = strtolower($type[1]);
+
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $imageData = base64_decode($imageData);
+
+                $fileName = uniqid() . '.' . $extension;
+                $filePath = public_path("storage\\book\\" . $fileName);
+
+                file_put_contents($filePath, $imageData);
+                $validatedData['image'] = $fileName;
+                
+                // $path = Storage::disk('public')->put('book', $imageData);
+                // $validatedData['image'] = $path;
             }
+
             $data = Buku::create($validatedData);
-            // dd($validatedData);
             return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
         } catch (ValidationException $e) {
             return response()->json([

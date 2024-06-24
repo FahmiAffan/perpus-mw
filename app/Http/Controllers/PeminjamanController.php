@@ -36,7 +36,7 @@ class PeminjamanController extends Controller
                 $data[$key]->tgl_pinjam = Carbon::parse($datas->tgl_pinjam)->diffForHumans();
                 $data[$key]->tgl_pengembalian = Carbon::parse($datas->tgl_pengembalian)->diffForHumans();
             }
-            return response()->json(["msg" => "Successfuly Get Data", "data" => $data], 200);
+            return response()->json(["msg" => "Successfuly Get Data", "data" => $data, "status" => 2000], 200);
         } else {
             $data = Peminjaman::where('penerbit', '=', $request->input('penerbit'))->orWhere('judul_buku', $request->input('judul_buku'))->get();
         }
@@ -85,24 +85,36 @@ class PeminjamanController extends Controller
                 $validatedData['tgl_pengembalian'] = $date1;
                 $validatedData['tgl_pinjam'] = $date2;
 
-                $data = Peminjaman::create($validatedData);
+                // $data = Peminjaman::create($validatedData);
+
+                // $dataBuku = [];
+
+                function buku($id)
+                {
+                    return Buku::find($id);
+                }
 
                 foreach ($request->list_buku as $key => $field) {
-                    DetailPeminjaman::create([
-                        "id_peminjaman" => $data->id_peminjaman,
-                        "id_buku" => $field['id_buku'],
-                        "qty" => $field['qty']
-                    ]);
+                    // DetailPeminjaman::create([
+                    //     "id_peminjaman" => $data->id_peminjaman,
+                    //     "id_buku" => $field['id_buku'],
+                    //     "qty" => $field['qty']
+                    // ]);
 
-                    $dataBuku[$key] = Buku::find($field['id_buku']);
-
-                    if ($dataBuku[$key]->qty == null || $dataBuku[$key]->qty == 0 || $dataBuku[$key]->qty <= 0) {
-                        return response()->json(["msg" => "Stok Buku dengan nama " . $dataBuku[$key]->judul_buku . " Habis!!"], 400);
-                    } else {
-                        $dataBuku[$key]->decrement('qty', $field['qty']);
-                        return response()->json(["msg" => "Succesfully Created Data", "data" => $data], 201);
-                    }
+                    // $dataBuku[$key] = Buku::find($field['id_buku']);
+                    $dataBuku[$key] = buku($field['id_buku']);
                 }
+
+
+                // if ($dataBuku[$key]->qty == null || $dataBuku[$key]->qty == 0 || $dataBuku[$key]->qty <= 0) {
+                //     return response()->json(["msg" => "Stok Buku dengan nama " . $dataBuku[$key]->judul_buku . " Habis!!"], 400);
+                // } else {
+                //     $dataBuku[$key]->decrement('qty', $field['qty']);
+                //     return response()->json([
+                //         "msg" => "Succesfully Created Data", "data" => $key, "status" => 2001
+
+                //     ], 201);
+                // }
             }
         } catch (ValidationException $e) {
             return response()->json([

@@ -129,6 +129,10 @@ class PetugasController extends Controller
             if ($validatedData) {
                 $oldImage = User::find($id)->image;
                 Storage::delete($oldImage);
+
+                $path = Storage::disk('public')->put('avatar', $validatedData['image']);
+                $validatedData['image'] = $path;
+                
                 $data = User::where('id_buku', '=', $id)->update($validatedData);
             }
 
